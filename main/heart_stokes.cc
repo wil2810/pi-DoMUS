@@ -23,13 +23,17 @@
                                             "piDoMUS", \
                                             interface); \
   ParameterAcceptor::initialize(prm_file, pde_name+"_used.prm"); \
-  pidomus.lamdas.output_step = [&] (???)           \
+  stokes.lamdas.output_step = [&] (const double t,                            \
+                                   const typename LAC::VectorType &sol,       \
+                                   const typename LAC::VectorType &sol_dot,   \
+                                   const unsigned int step_number)            \
   {                                                                           \
       auto &dof = interface->get_dof_handler();                               \
       auto &tria = dof.get_triangulation();                                   \
-      double timestep, dt;                                                    \
+      double timestep = stokes.lambdas.simulator->current_time;               \
+      double dt = stokes.lambdas.simulator->current_dt;                       \
                                                                               \
-      ElasticProblem elastic_problem(timestep, dt);                           \
+      ElasticProblem<dim> elastic_problem(timestep, dt);                      \
       elastic_problem.run(tria);                                              \
   };                                                                          \
   stokes.run ();
