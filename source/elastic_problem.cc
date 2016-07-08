@@ -1,7 +1,7 @@
 #include "elastic_problem.h"
 #include "boundary_values.h"
 #include <iostream>
-  
+
 template <int dim>
 class RightHandSide :  public Function<dim>
 {
@@ -71,7 +71,7 @@ ElasticProblem<dim>::ElasticProblem (double timestep, double dt)
   dt(dt)
 {}
 
-    template <int dim>
+template <int dim>
 ElasticProblem<dim>::~ElasticProblem ()
 {
   dof_handler.clear ();
@@ -235,30 +235,30 @@ void ElasticProblem<dim>::refine_grid ()
 template <int dim>
 void ElasticProblem<dim>::run (Triangulation<dim> &external_tria)
 {
-    // create grid 
-    // cylinder from x = -3.5 to x = 1.6838 with radius = 1.3858
-    // height: 1.6838 + 3.5 = 5.1838 --> half height: 2.5919
-    //                      (triangulation, radius, half_length)
-    GridGenerator::cylinder (triangulation, 1.3858, 2.5919); 
+  // create grid
+  // cylinder from x = -3.5 to x = 1.6838 with radius = 1.3858
+  // height: 1.6838 + 3.5 = 5.1838 --> half height: 2.5919
+  //                      (triangulation, radius, half_length)
+  GridGenerator::cylinder (triangulation, 1.3858, 2.5919);
 
-    // shift mesh in x direction such that the top face is at x = 1.6838
-    // 1.6838 - 2.5919 = -0.9081
-    Tensor<1, 3> shift_vec;
-    shift_vec[0] = -0.9081;
-    GridTools::shift(shift_vec, triangulation);
+  // shift mesh in x direction such that the top face is at x = 1.6838
+  // 1.6838 - 2.5919 = -0.9081
+  Tensor<1, 3> shift_vec;
+  shift_vec[0] = -0.9081;
+  GridTools::shift(shift_vec, triangulation);
 
-    triangulation.set_all_manifold_ids_on_boundary(0,0);
-    static const CylindricalManifold<dim> cylM;
-    triangulation.set_manifold (0, cylM);
+  triangulation.set_all_manifold_ids_on_boundary(0,0);
+  static const CylindricalManifold<dim> cylM;
+  triangulation.set_manifold (0, cylM);
 
-    triangulation.refine_global (2);
+  triangulation.refine_global (2);
 
-    // solve 
-    setup_system ();
-    assemble_system ();
-    solve ();
+  // solve
+  setup_system ();
+  assemble_system ();
+  solve ();
 
-    external_tria.copy_triangulation(triangulation);
+  external_tria.copy_triangulation(triangulation);
 }
 
 // Explicit instantiations

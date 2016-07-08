@@ -17,11 +17,11 @@ BoundaryValues<dim>::value (const Point<dim>  &p,
   BoundaryValues<dim>::vector_value (p, values);
 
   if (component == 0)
-      return values(0);
+    return values(0);
   if (component == 1)
-      return values(1);
+    return values(1);
   if (component == 2)
-      return values(2);
+    return values(2);
   return 0;
 }
 
@@ -30,15 +30,16 @@ void
 BoundaryValues<dim>::vector_value (const Point<dim> &p,
                                    Vector<double>   &values) const
 {
-    if(derivative)
-        BoundaryValues<dim>::get_values_dt(p, values);
-    else
+  if (derivative)
+    BoundaryValues<dim>::get_values_dt(p, values);
+  else
     {
-        if (color == 2) {
-            get_heartdelta(p, values, heartstep);
+      if (color == 2)
+        {
+          get_heartdelta(p, values, heartstep);
         }
-        else
-            BoundaryValues<dim>::get_values(p, values);
+      else
+        BoundaryValues<dim>::get_values(p, values);
     }
 }
 
@@ -50,7 +51,7 @@ template <int dim>
 void
 BoundaryValues<dim>::transform_to_polar_coord (const Point<3> &p,
                                                double rot,
-                                               double &angle, 
+                                               double &angle,
                                                double &height) const
 {
   // convert point to polar coordinates
@@ -64,7 +65,7 @@ BoundaryValues<dim>::transform_to_polar_coord (const Point<3> &p,
 
   // angle needs to be in the range from 0 to 2Pi
   phi = (phi < 0) ? phi+2*PI : phi;
-  
+
   angle = phi;
   height = x;
 }
@@ -85,8 +86,8 @@ BoundaryValues<dim>::get_heartdelta (const Point<dim> &p,
                                      Vector<double>   &values,
                                      int heartstep) const
 {
-  if (color == 2)         //////////////////////////////// top face 
-  {
+  if (color == 2)         //////////////////////////////// top face
+    {
       // convert to polar coordinates and rotate 45 degrees
       double phi, h, rot = PI/4;
       transform_to_polar_coord(p, rot, phi, h);
@@ -99,14 +100,14 @@ BoundaryValues<dim>::get_heartdelta (const Point<dim> &p,
       r = sqrt(x*x + y*y);
       x = r * cos(phi);
       y = r * sin(phi);
-      
+
       // calc delta
       values(0) = 0;
       values(1) = y - p(1);
       values(2) = x - p(2);
-  }
+    }
   else if (color == 1)    //////////////////////////////// bottom face
-  {
+    {
       double x, y;
       x = p(2);
       y = p(1);
@@ -121,14 +122,14 @@ BoundaryValues<dim>::get_heartdelta (const Point<dim> &p,
       values(0) = heart_p(0) - p(0);
       values(1) = heart_p(1) - p(1);
       values(2) = heart_p(2) - p(2);
-  }
+    }
   else if (color == 0)    //////////////////////////////// hull
-  {
+    {
       // convert to polar coordinates and rotate -45 degrees
       double phi, h, rot = -PI/4;
       transform_to_polar_coord(p, rot, phi, h);
       Point<2> polar_pnt (phi, h);
-      
+
       //get heart boundary point
       Point<3> heart_p = heart.push_forward (polar_pnt, heartstep);
       swap_coord(heart_p);
@@ -137,7 +138,7 @@ BoundaryValues<dim>::get_heartdelta (const Point<dim> &p,
       values(0) = heart_p(0) - p(0);
       values(1) = heart_p(1) - p(1);
       values(2) = heart_p(2) - p(2);
-  }
+    }
 }
 
 template <int dim>
@@ -145,26 +146,26 @@ void
 BoundaryValues<dim>::get_values (const Point<dim> &p,
                                  Vector<double>   &values) const
 {
-    Vector<double> u_(dim);                                 // u_t-1
-    Vector<double> u(dim);                                  // u_t
-    Vector<double> delta_u(dim);                            // u_t - u_t-1
-    double substep = (fmod (timestep, heartinterval)/dt + 1)
-                     / (heartinterval / dt);
+  Vector<double> u_(dim);                                 // u_t-1
+  Vector<double> u(dim);                                  // u_t
+  Vector<double> delta_u(dim);                            // u_t - u_t-1
+  double substep = (fmod (timestep, heartinterval)/dt + 1)
+                   / (heartinterval / dt);
 
-    BoundaryValues<dim>::get_heartdelta(p, u_, (heartstep-1 < 0) ? 0 : heartstep-1);
-    BoundaryValues<dim>::get_heartdelta(p, u, heartstep);
+  BoundaryValues<dim>::get_heartdelta(p, u_, (heartstep-1 < 0) ? 0 : heartstep-1);
+  BoundaryValues<dim>::get_heartdelta(p, u, heartstep);
 
-    // calc delta_u
-    delta_u = u;
-    delta_u -= u_;
-    // scale delta_u
-    delta_u *= substep;
+  // calc delta_u
+  delta_u = u;
+  delta_u -= u_;
+  // scale delta_u
+  delta_u *= substep;
 
-    u_ += delta_u;
+  u_ += delta_u;
 
-    values(0) = u_(0);
-    values(1) = u_(1);
-    values(2) = u_(2);
+  values(0) = u_(0);
+  values(1) = u_(1);
+  values(2) = u_(2);
 }
 
 
@@ -174,23 +175,23 @@ void
 BoundaryValues<dim>::get_values_dt (const Point<dim> &p,
                                     Vector<double>   &values) const
 {
-    Vector<double> u(dim);      // u_t
-    Vector<double> u_(dim);     // u_t+1
-    double substep = (fmod (timestep, heartinterval)/dt + 1)
-                     / (heartinterval / dt);
+  Vector<double> u(dim);      // u_t
+  Vector<double> u_(dim);     // u_t+1
+  double substep = (fmod (timestep, heartinterval)/dt + 1)
+                   / (heartinterval / dt);
 
-    BoundaryValues<dim>::get_heartdelta(p, u, heartstep);
-    BoundaryValues<dim>::get_heartdelta(p, u_, (heartstep+1 > 99) ? 0 : heartstep+1);
+  BoundaryValues<dim>::get_heartdelta(p, u, heartstep);
+  BoundaryValues<dim>::get_heartdelta(p, u_, (heartstep+1 > 99) ? 0 : heartstep+1);
 
-    // (u_t+1 - u_t) / h
-    u_ -= u;
-    u_ /= heartinterval;
-    // scale u_
-    u_ *= substep;
+  // (u_t+1 - u_t) / h
+  u_ -= u;
+  u_ /= heartinterval;
+  // scale u_
+  u_ *= substep;
 
-    values(0) = u_(0);
-    values(1) = u_(1);
-    values(2) = u_(2);
+  values(0) = u_(0);
+  values(1) = u_(1);
+  values(2) = u_(2);
 }
 
 // Explicit instantiations

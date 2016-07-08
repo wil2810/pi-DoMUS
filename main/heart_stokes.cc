@@ -103,21 +103,21 @@ int main (int argc, char *argv[])
       ParameterAcceptor::initialize(prm_file, pde_name+"_used.prm");
 
       stokes.lambdas.output_step = [&] (const double t,
-                                        const typename LATrilinos::VectorType &sol,
-                                        const typename LATrilinos::VectorType &sol_dot,
-                                        const unsigned int step_number)
+                                        const typename LATrilinos::VectorType &/*sol*/,
+                                        const typename LATrilinos::VectorType &/*sol_dot*/,
+                                        const unsigned int /*step_number*/)
       {
-          auto &dof = interface.get_dof_handler();
-          auto &tria = dof.get_triangulation();
-          double timestep = stokes.lambdas.simulator->current_time;
-          double dt = stokes.lambdas.simulator->current_dt;
-          
-          ElasticProblem<3> elastic_problem(timestep, dt);
-          elastic_problem.run(tria);
+//          auto &dof = interface.get_dof_handler();
+        auto &tria = const_cast<parallel::distributed::Triangulation<3,3>&>
+                     (interface.get_triangulation());
+        double dt = interface.get_timestep();
+
+        ElasticProblem<3> elastic_problem(t, dt);
+        elastic_problem.run(tria);
       };
 
       stokes.run ();
-              
+
 
       out << std::endl;
     }
