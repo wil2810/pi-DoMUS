@@ -102,6 +102,7 @@ int main (int argc, char *argv[])
       piDoMUS<3,3,LATrilinos> stokes ("pi-DoMUS",interface);
       ParameterAcceptor::initialize(prm_file, pde_name+"_used.prm");
 
+
       stokes.lambdas.output_step = [&] (const double t,
                                         const typename LATrilinos::VectorType &/*sol*/,
                                         const typename LATrilinos::VectorType &/*sol_dot*/,
@@ -111,6 +112,8 @@ int main (int argc, char *argv[])
         auto &tria = const_cast<parallel::distributed::Triangulation<3,3>&>
                      (interface.get_triangulation());
         double dt = interface.get_timestep();
+        if (dt != dt)   // check if dt is NaN
+            dt = 1;
 
         ElasticProblem<3> elastic_problem(t, dt);
         elastic_problem.run(tria);
