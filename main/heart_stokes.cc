@@ -15,30 +15,6 @@
 
 #include "elastic_problem.h"
 
-////////////////////////////////////////////////////////////////////////////////
-// Begin macros
-#define problem_Stokes(dim,spacedim,LAC) \
-  StokesInterface<dim,spacedim,LATrilinos> interface; \
-  piDoMUS<dim,spacedim,LAC> stokes ( \
-                                            "piDoMUS", \
-                                            interface); \
-  ParameterAcceptor::initialize(prm_file, pde_name+"_used.prm"); \
-  stokes.lamdas.output_step = [&] (const double t,                            \
-                                   const typename LAC::VectorType &sol,       \
-                                   const typename LAC::VectorType &sol_dot,   \
-                                   const unsigned int step_number)            \
-  {                                                                           \
-      auto &dof = interface->get_dof_handler();                               \
-      auto &tria = dof.get_triangulation();                                   \
-      double timestep = stokes.lambdas.simulator->current_time;               \
-      double dt = stokes.lambdas.simulator->current_dt;                       \
-                                                                              \
-      ElasticProblem<dim> elastic_problem(timestep, dt);                      \
-      elastic_problem.run(tria);                                              \
-  };                                                                          \
-  stokes.run ();
-// End macros
-////////////////////////////////////////////////////////////////////////////////
 
 void print_status(  std::string name,
                     std::string prm_file,
@@ -70,7 +46,7 @@ int main (int argc, char *argv[])
   // int spacedim = 2;
   // My_CLP.setOption("spacedim", &spacedim, "dimensione of the whole space");
 
-  int dim = 2;
+  int dim = 3;
   My_CLP.setOption("dim", &dim, "dimension of the problem");
 
   int n_threads = 0;
@@ -122,15 +98,26 @@ int main (int argc, char *argv[])
                       comm,
                       check_prm);
 
-      if (dim==2)
-        {
-          problem_Stokes(2,2,LATrilinos);
-        }
-      else
-        {
-          problem_Stokes(3,3,LATrilinos);
-        }
-      
+      StokesInterface<3,3,LATrilinos> interface;
+      piDoMUS<3,3,LATrilinos> stokes ("pi-DoMUS",interface);
+      ParameterAcceptor::initialize(prm_file, pde_name+"_used.prm");
+
+      stokes.lambdas.output_step = [&] (const double t,
+                                        const typename LATrilinos::VectorType &sol,
+                                        const typename LATrilinos::VectorType &sol_dot,
+                                        const unsigned int step_number)
+      {
+          auto &dof = interface.get_dof_handler();
+          auto &tria = dof.get_triangulation();
+          double timestep = stokes.lambdas.simulator->current_time;
+          double dt = stokes.lambdas.simulator->current_dt;
+          
+          ElasticProblem<3> elastic_problem(timestep, dt);
+          elastic_problem.run(tria);
+      };
+
+      stokes.run ();
+              
 
       out << std::endl;
     }
