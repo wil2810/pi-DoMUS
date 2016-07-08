@@ -37,9 +37,9 @@ class ElasticProblem
 {
 public:
   ElasticProblem ();
-  ElasticProblem (Triangulation<dim> &tria, double timestep, double dt);
+  ElasticProblem (double timestep, double dt);
   ~ElasticProblem ();
-  void run ();
+  void run (Triangulation<dim> &external_tria);
 private:
   void setup_system ();
   void assemble_system ();

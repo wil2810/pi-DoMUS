@@ -63,7 +63,7 @@ ElasticProblem<dim>::ElasticProblem ()
 {}
 
 template <int dim>
-ElasticProblem<dim>::ElasticProblem (Triangulation<dim> &tria, double timestep, double dt)
+ElasticProblem<dim>::ElasticProblem (double timestep, double dt)
   :
   dof_handler (triangulation),
   fe (FE_Q<dim>(1), dim),
@@ -233,7 +233,7 @@ void ElasticProblem<dim>::refine_grid ()
 }
 
 template <int dim>
-void ElasticProblem<dim>::run ()
+void ElasticProblem<dim>::run (Triangulation<dim> &external_tria)
 {
     // create grid 
     // cylinder from x = -3.5 to x = 1.6838 with radius = 1.3858
@@ -258,7 +258,7 @@ void ElasticProblem<dim>::run ()
     assemble_system ();
     solve ();
 
-    // tria = triangulation
+    external_tria.copy_triangulation(triangulation);
 }
 
 // Explicit instantiations

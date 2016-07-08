@@ -13,6 +13,8 @@
 #include <iostream>
 #include <string>
 
+#include "elastic_problem.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 // Begin macros
 #define problem_Stokes(dim,spacedim,LAC) \
@@ -21,6 +23,15 @@
                                             "piDoMUS", \
                                             interface); \
   ParameterAcceptor::initialize(prm_file, pde_name+"_used.prm"); \
+  pidomus.lamdas.output_step = [&] (???)           \
+  {                                                                           \
+      auto &dof = interface->get_dof_handler();                               \
+      auto &tria = dof.get_triangulation();                                   \
+      double timestep, dt;                                                    \
+                                                                              \
+      ElasticProblem elastic_problem(timestep, dt);                           \
+      elastic_problem.run(tria);                                              \
+  };                                                                          \
   stokes.run ();
 // End macros
 ////////////////////////////////////////////////////////////////////////////////
