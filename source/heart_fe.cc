@@ -18,7 +18,7 @@
 using namespace dealii;
 
 template <int dim, int spacedim>
-Heart<dim,spacedim>::Heart() 
+Heart<dim,spacedim>::Heart()
   :
   fe (FE_Q<dim>(2), spacedim),
   dof_handler (triangulation)
@@ -33,16 +33,16 @@ Heart<dim,spacedim>::Heart(bool s, const int degree)
   side(s)
 {
   if (side)
-  {
-    run_side();
-  }
+    {
+      run_side();
+    }
   else
-  {
-    Assert (degree == 1 || degree == 2,
-            ExcMessage("Fe degree must either be equal 1 or 2. Sorry for that!\n"
-                       "Degree 3 or more is not availiable due to insufficient data"));
-    run_bottom();
-  }
+    {
+      Assert (degree == 1 || degree == 2,
+              ExcMessage("Fe degree must either be equal 1 or 2. Sorry for that!\n"
+                         "Degree 3 or more is not availiable due to insufficient data"));
+      run_bottom();
+    }
 }
 
 template <int dim, int spacedim>
@@ -50,7 +50,7 @@ void Heart<dim,spacedim>::setup_system()
 {
   dof_handler.distribute_dofs(fe);
   Point<dim> direction (1e-5,1e5);
-  // lexicographical numbering of the dofs 
+  // lexicographical numbering of the dofs
   // due to the heart point ordering
   DoFRenumbering::downstream (dof_handler, direction, true);
 }
@@ -60,40 +60,40 @@ void Heart<dim,spacedim>::reinit_data()
 {
   std::string filename;
   if (side)
-  {
-    filename = "../source/side_boundary.txt";
-  }
+    {
+      filename = "../source/side_boundary.txt";
+    }
   else
-  {
-    filename =  "../source/bottom_boundary.txt";
-  }
+    {
+      filename =  "../source/bottom_boundary.txt";
+    }
   std::fstream in (filename);
   int n_dofs = dof_handler.n_dofs();
   for (int line = 0; line < 100; ++line)
-  {
-    solution[line].reinit(n_dofs);
-    for (int column = 0; column < n_dofs; ++column)
     {
-      in >> solution[line][column];
+      solution[line].reinit(n_dofs);
+      for (int column = 0; column < n_dofs; ++column)
+        {
+          in >> solution[line][column];
+        }
     }
-  }
 }
 
 template <int dim, int spacedim>
-Point<spacedim> Heart<dim,spacedim>::push_forward(const Point<dim> chartpoint, 
+Point<spacedim> Heart<dim,spacedim>::push_forward(const Point<dim> chartpoint,
                                                   const int timestep) const
 {
   auto cell = GridTools::find_active_cell_around_point (dof_handler,
-                                                        chartpoint); 
+                                                        chartpoint);
   // identifying vertex orientation
   // redundance for readability !
   Point<2> lower_left  ( cell->vertex(0)[0], cell->vertex(0)[1] );
   Point<2> lower_right ( cell->vertex(1)[0], cell->vertex(1)[1] );
   Point<2> upper_left  ( cell->vertex(2)[0], cell->vertex(2)[1] );
 
-  Point<2> scaled_point ( (chartpoint[0]  - lower_left[0])/ 
+  Point<2> scaled_point ( (chartpoint[0]  - lower_left[0])/
                           (lower_right[0] - lower_left[0])    ,
-                          (chartpoint[1]  - lower_left[1])/ 
+                          (chartpoint[1]  - lower_left[1])/
                           (upper_left[1]  - lower_left[1])    );
   // initializing quadrature by scaled point
   Quadrature<dim> quad(scaled_point);
@@ -116,8 +116,8 @@ void Heart<dim,spacedim>::run_side()
   const Point<dim> p1 (0,-3.5);
   const Point<dim> p2 (2*numbers::PI,1.6838);
 
-  GridGenerator::subdivided_hyper_rectangle(triangulation, 
-                                            subdivisions, 
+  GridGenerator::subdivided_hyper_rectangle(triangulation,
+                                            subdivisions,
                                             p1, p2, false);
   setup_system();
   reinit_data();
@@ -132,8 +132,8 @@ void Heart<dim,spacedim>::run_bottom()
   const Point<dim> p1 (-1.3858, -1.3858);
   const Point<dim> p2 ( 1.3858,  1.3858);
 
-  GridGenerator::subdivided_hyper_rectangle(triangulation, 
-                                            subdivisions, 
+  GridGenerator::subdivided_hyper_rectangle(triangulation,
+                                            subdivisions,
                                             p1, p2, false);
   setup_system();
   reinit_data();

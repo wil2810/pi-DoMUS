@@ -22,9 +22,9 @@ private:
   void run_side ();
   void run_bottom ();
 
-  Triangulation<dim>		   		triangulation;
-  FESystem<dim> 			       	fe;
-  DoFHandler<dim>			      	dof_handler;
+  Triangulation<dim>          triangulation;
+  FESystem<dim>               fe;
+  DoFHandler<dim>             dof_handler;
   std::vector<Vector<double> >      solution;
 
   bool side;
