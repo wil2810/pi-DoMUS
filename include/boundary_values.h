@@ -13,7 +13,7 @@ class BoundaryValues : public Function<dim>
 public:
   BoundaryValues (int color, bool derivative=false)
     :
-    Function<dim>(2*dim+1),
+    Function<dim>(dim),
     color(color),
     derivative(derivative)
   {}
@@ -24,7 +24,7 @@ public:
                   int degree,
                   bool derivative=false)
     :
-    Function<dim>(2*dim+1),
+    Function<dim>(dim),
     color(color),
     timestep(timestep),
     dt(dt),
