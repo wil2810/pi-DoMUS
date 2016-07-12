@@ -47,7 +47,7 @@ int main (int argc, char *argv[])
   // My_CLP.setOption("spacedim", &spacedim, "dimensione of the whole space");
 
   int dim = 3;
-  My_CLP.setOption("dim", &dim, "dimension of the problem");
+  //My_CLP.setOption("dim", &dim, "dimension of the problem");
 
   int n_threads = 0;
   My_CLP.setOption("n_threads", &n_threads, "number of threads");
@@ -113,7 +113,7 @@ int main (int argc, char *argv[])
                      (interface.get_triangulation());
         double dt = interface.get_timestep();
         if (dt != dt)   // check if dt is NaN
-            dt = 1;
+          dt = 1;
 
         ElasticProblem<3> elastic_problem(t, dt);
         elastic_problem.run(tria);
